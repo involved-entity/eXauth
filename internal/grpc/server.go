@@ -37,6 +37,16 @@ type IsAdminRequestDTO struct {
 	Token string `json:"token" validate:"required"`
 }
 
+type RegenerateCodeDTO struct {
+	ID    int    `json:"id" validate:"required,gt=0"`
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ActivateAccountDTO struct {
+	ID   int    `json:"id" validate:"required,gt=0"`
+	Code string `json:"code" validate:"required"`
+}
+
 type serverAPI struct {
 	auth.UnimplementedAuthServer
 }
@@ -79,6 +89,10 @@ func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.
 	user, err := rep.SaveUser(r.Username, r.Email, string(hashedPassword))
 	if err != nil {
 		return nil, status.Error(codes.AlreadyExists, "this user already exists")
+	}
+
+	if err := CreateAndSendToken(user.ID, user.Email); err != nil {
+		return nil, err
 	}
 
 	return &auth.RegisterResponse{Id: int64(user.ID)}, nil
@@ -146,4 +160,33 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 	}
 
 	return &auth.IsAdminResponse{IsAdmin: user.IsAdmin}, nil
+}
+
+func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
+	dto := RegenerateCodeDTO{}
+	if err := ValidateRequest(r, dto); err != nil {
+		return nil, err
+	}
+	if err := CreateAndSendToken(uint(dto.ID), dto.Email); err != nil {
+		return nil, err
+	}
+	return &auth.RegenerateCodeResponse{Msg: "success"}, nil
+}
+
+func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequest) (*auth.ActivateAccountResponse, error) {
+	dto := ActivateAccountDTO{}
+	if err := ValidateRequest(r, dto); err != nil {
+		return nil, err
+	}
+
+	config := conf.GetConfig()
+	if err := CheckRedisToken(dto.ID, dto.Code, config.OTP.RedisName); err != nil {
+		return nil, err
+	}
+
+	rep := Repository{db: database.GetDB(), UserID: int(dto.ID)}
+	if err := rep.VerificateUser(); err != nil {
+		return nil, status.Error(codes.Internal, "failed to activate account")
+	}
+	return &auth.ActivateAccountResponse{Msg: "success"}, nil
 }
