@@ -184,15 +184,39 @@ func TestActivateAccount(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
-	response, err := client.Login(context.Background(), &auth.LoginRequest{
-		Username: userData.Username,
-		Password: userData.Password,
-	})
+	tt := []map[string]any{
+		{
+			"username": "inv",
+			"password": userData.Password,
+			"success":  false,
+		},
+		{
+			"username": userData.Username,
+			"password": "invalid",
+			"success":  false,
+		},
+		{
+			"username": userData.Username,
+			"password": userData.Password,
+			"success":  true,
+		},
+	}
 
-	require.NoError(t, err)
-	require.True(t, IsValidJWT(response.Token))
+	for _, tc := range tt {
+		response, err := client.Login(context.Background(), &auth.LoginRequest{
+			Username: tc["username"].(string),
+			Password: tc["password"].(string),
+		})
 
-	JWT = response.Token
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+			require.True(t, IsValidJWT(response.Token))
+
+			JWT = response.Token
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestIsAdmin(t *testing.T) {
