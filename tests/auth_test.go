@@ -2,8 +2,8 @@ package tests
 
 import (
 	"auth/api/auth"
-	conf "auth/internal/config"
 	"auth/internal/database"
+	conf "auth/internal/pkg/config"
 	"auth/internal/redis"
 	"context"
 	"log"

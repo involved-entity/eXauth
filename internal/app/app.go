@@ -1,8 +1,8 @@
 package app
 
 import (
-	cfg "auth/internal/config"
 	authgrpc "auth/internal/grpc"
+	cfg "auth/internal/pkg/config"
 	"log/slog"
 	"net"
 
