@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func ValidateRequest(rpb interface{}, dto interface{}) error {
+func ValidateRequest(dto interface{}) error {
 	validate := validator.New()
 	err := validate.Struct(dto)
 	if err != nil {
