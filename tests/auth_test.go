@@ -35,6 +35,7 @@ func InitTest() *grpc.ClientConn {
 	config := conf.GetConfig()
 	conn, err := grpc.NewClient("localhost:"+config.GRPC.Port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	redis.Init(config.Redis.Address, config.Redis.Password, config.Redis.DB)
+
 	if err != nil {
 		log.Fatalf("Failed to connect to gRPC server: %v", err)
 	}
@@ -61,31 +62,84 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegister(t *testing.T) {
-	if client == nil {
-		t.Fatal("gRPC client is not initialized")
-	}
-
 	userData.Email = gofakeit.Email()
 	userData.Username = gofakeit.Username()
 	userData.Password = gofakeit.Password(true, true, true, false, false, 8)
 
-	response, err := client.Register(context.Background(), &auth.RegisterRequest{
-		Email:    userData.Email,
-		Username: userData.Username,
-		Password: userData.Password,
-	})
+	tt := []map[string]any{
+		{
+			"email":    "invalid.com",
+			"username": userData.Username,
+			"password": userData.Password,
+			"success":  false,
+		},
+		{
+			"email":    userData.Email,
+			"username": "inv",
+			"password": userData.Password,
+			"success":  false,
+		},
+		{
+			"email":    userData.Email,
+			"username": userData.Username,
+			"password": "inv",
+			"success":  false,
+		},
+		{
+			"email":    userData.Email,
+			"username": userData.Username,
+			"password": userData.Password,
+			"success":  true,
+		},
+	}
 
-	require.NoError(t, err)
-	userData.ID = int(response.Id)
+	for _, tc := range tt {
+		response, err := client.Register(context.Background(), &auth.RegisterRequest{
+			Email:    tc["email"].(string),
+			Username: tc["username"].(string),
+			Password: tc["password"].(string),
+		})
+
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+			userData.ID = int(response.Id)
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestRegenerateCode(t *testing.T) {
-	response, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
-		Id:    int64(userData.ID),
-		Email: userData.Email,
-	})
+	tt := []map[string]any{
+		{
+			"id":      0,
+			"email":   userData.Email,
+			"success": false,
+		},
+		{
+			"id":      userData.ID,
+			"email":   "invalid.com",
+			"success": false,
+		},
+		{
+			"id":      userData.ID,
+			"email":   userData.Email,
+			"success": true,
+		},
+	}
 
-	AssertSuccess(t, err, response.GetMsg())
+	for _, tc := range tt {
+		response, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
+			Id:    int64(tc["id"].(int)),
+			Email: tc["email"].(string),
+		})
+
+		if tc["success"].(bool) {
+			AssertSuccess(t, err, response.GetMsg())
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestActivateAccount(t *testing.T) {
