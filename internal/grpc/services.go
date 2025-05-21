@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	conf "auth/internal/config"
 	"auth/internal/machinery"
+	conf "auth/internal/pkg/config"
 	"auth/internal/redis"
 	"context"
 	"crypto/rand"

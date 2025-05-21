@@ -1,8 +1,8 @@
 package main
 
 import (
-	conf "auth/internal/config"
 	"auth/internal/machinery"
+	conf "auth/internal/pkg/config"
 	"log"
 )
 

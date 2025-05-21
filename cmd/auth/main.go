@@ -2,7 +2,7 @@ package main
 
 import (
 	"auth/internal/app"
-	"auth/internal/config"
+	"auth/internal/pkg/config"
 	"os"
 	"os/signal"
 	"syscall"
