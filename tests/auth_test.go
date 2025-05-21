@@ -250,11 +250,28 @@ func TestIsAdmin(t *testing.T) {
 }
 
 func TestResetPassword(t *testing.T) {
-	response, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
-		Username: userData.Username,
-	})
+	tt := []map[string]any{
+		{
+			"username": "invalid",
+			"success":  false,
+		},
+		{
+			"username": userData.Username,
+			"success":  true,
+		},
+	}
 
-	AssertSuccess(t, err, response.GetMsg())
+	for _, tc := range tt {
+		response, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
+			Username: tc["username"].(string),
+		})
+
+		if tc["success"].(bool) {
+			AssertSuccess(t, err, response.GetMsg())
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestResetPasswordConfirm(t *testing.T) {
