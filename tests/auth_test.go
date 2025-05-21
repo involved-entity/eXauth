@@ -283,11 +283,38 @@ func TestResetPasswordConfirm(t *testing.T) {
 
 	require.NoError(t, err)
 
-	response, err := client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
-		Id:       int64(userData.ID),
-		Token:    token,
-		Password: userData.Password,
-	})
+	tt := []map[string]any{
+		{
+			"id":       0,
+			"token":    "invalid",
+			"password": "invalid",
+			"success":  false,
+		},
+		{
+			"id":       userData.ID,
+			"token":    "invalid",
+			"password": "invalid",
+			"success":  false,
+		},
+		{
+			"id":       userData.ID,
+			"token":    token,
+			"password": userData.Password,
+			"success":  true,
+		},
+	}
 
-	AssertSuccess(t, err, response.GetMsg())
+	for _, tc := range tt {
+		response, err := client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
+			Id:       int64(tc["id"].(int)),
+			Password: tc["password"].(string),
+			Token:    tc["token"].(string),
+		})
+
+		if tc["success"].(bool) {
+			AssertSuccess(t, err, response.GetMsg())
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
