@@ -173,7 +173,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 }
 
 func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
-	dto := RegenerateCodeDTO{}
+	dto := RegenerateCodeDTO{ID: int(r.Id), Email: r.Email}
 	if err := ValidateRequest(r, dto); err != nil {
 		return nil, err
 	}
