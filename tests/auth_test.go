@@ -220,12 +220,33 @@ func TestLogin(t *testing.T) {
 }
 
 func TestIsAdmin(t *testing.T) {
-	response, err := client.IsAdmin(context.Background(), &auth.IsAdminRequest{
-		Token: JWT,
-	})
+	tt := []map[string]any{
+		{
+			"token":   "",
+			"success": false,
+		},
+		{
+			"token":   "invalid",
+			"success": false,
+		},
+		{
+			"token":   JWT,
+			"success": true,
+		},
+	}
 
-	require.NoError(t, err)
-	require.False(t, response.IsAdmin)
+	for _, tc := range tt {
+		response, err := client.IsAdmin(context.Background(), &auth.IsAdminRequest{
+			Token: tc["token"].(string),
+		})
+
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+			require.False(t, response.IsAdmin)
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestResetPassword(t *testing.T) {
