@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "auth/auth";
+
+service Auth {
+    rpc Register(RegisterRequest) returns (RegisterResponse);
+    rpc Login(LoginRequest) returns (LoginResponse);
+    rpc IsAdmin(IsAdminRequest) returns (IsAdminResponse);
+    rpc RegenerateCode(RegenerateCodeRequest) returns (RegenerateCodeResponse);
+    rpc ActivateAccount(ActivateAccountRequest) returns (ActivateAccountResponse);
+    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
+    rpc ResetPasswordConfirm(ResetPasswordConfirmRequest) returns (ResetPasswordConfirmResponse);
+}
+
+message ResetPasswordConfirmResponse {
+    string msg = 1;
+}
+
+message ResetPasswordResponse {
+    string msg = 1;
+}
+
+message ResetPasswordConfirmRequest {
+    int64 id = 1;
+    string token = 2;
+    string password = 3;
+}
+
+message ResetPasswordRequest {
+    string username = 1;
+}
+
+message ActivateAccountResponse {
+    string msg = 1;
+}
+
+message RegenerateCodeResponse {
+    string msg = 1;
+}
+
+message RegenerateCodeRequest {
+    int64 id = 1;
+    string email = 2;
+}
+
+message ActivateAccountRequest {
+    int64 id = 1;
+    string code = 2;
+}
+
+message RegisterRequest {
+    string email = 1;
+    string username = 2;
+    string password = 3;
+}
+
+message RegisterResponse {
+    int64 id = 1;
+}
+
+message LoginRequest {
+    string username = 1;
+    string password = 2;
+}
+
+message LoginResponse {
+    string token = 1;
+}
+
+message IsAdminRequest {
+    string token = 1;
+}
+
+message IsAdminResponse {
+    bool isAdmin = 1;
+}
