@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	"auth/internal/database"
+	"auth/internal/pkg/database"
 	"log"
 
 	"gorm.io/gorm"
