@@ -3,7 +3,7 @@ package grpc
 import (
 	"auth/internal/machinery"
 	conf "auth/internal/pkg/config"
-	"auth/internal/redis"
+	"auth/internal/pkg/redis"
 	"context"
 	"crypto/rand"
 	"errors"
