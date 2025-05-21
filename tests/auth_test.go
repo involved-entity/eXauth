@@ -137,3 +137,34 @@ func TestIsAdmin(t *testing.T) {
 
 	require.Equal(t, response.IsAdmin, false)
 }
+
+func TestResetPassword(t *testing.T) {
+	_, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
+		Username: userData.Username,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func TestResetPasswordConfirm(t *testing.T) {
+	config := conf.GetConfig()
+	name := config.ResetToken.RedisName
+	redisClient := redis.GetClient()
+
+	token, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
+		Id:       int64(userData.ID),
+		Token:    token,
+		Password: userData.Password,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}

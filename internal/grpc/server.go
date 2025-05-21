@@ -202,7 +202,7 @@ func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRe
 }
 
 func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
-	dto := ResetPasswordDTO{}
+	dto := ResetPasswordDTO{Username: r.Username}
 	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
@@ -221,7 +221,7 @@ func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordReques
 }
 
 func (s *serverAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
-	dto := ResetPasswordConfirmDTO{}
+	dto := ResetPasswordConfirmDTO{ID: int(r.Id), Token: r.Token, Password: r.Password}
 	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
