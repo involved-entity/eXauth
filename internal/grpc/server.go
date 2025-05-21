@@ -47,6 +47,10 @@ type ActivateAccountDTO struct {
 	Code string `json:"code" validate:"required"`
 }
 
+type ResetPasswordDTO struct {
+	Username string `json:"username" validate:"required,min=5,max=16"`
+}
+
 type serverAPI struct {
 	auth.UnimplementedAuthServer
 }
@@ -189,4 +193,23 @@ func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRe
 		return nil, status.Error(codes.Internal, "failed to activate account")
 	}
 	return &auth.ActivateAccountResponse{Msg: "success"}, nil
+}
+
+func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
+	dto := ResetPasswordDTO{}
+	if err := ValidateRequest(r, dto); err != nil {
+		return nil, err
+	}
+
+	rep := Repository{db: database.GetDB()}
+	user, err := rep.GetUser(UserInfo{Username: dto.Username})
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	if err := CreateAndSendResetPasswordLink(user.ID, user.Email); err != nil {
+		return nil, err
+	}
+
+	return &auth.ResetPasswordResponse{Msg: "success"}, nil
 }
