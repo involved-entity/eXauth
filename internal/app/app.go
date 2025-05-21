@@ -1,9 +1,15 @@
 package app
 
 import (
+	cfg "auth/internal/config"
 	authgrpc "auth/internal/grpc"
 	"log/slog"
 	"net"
+
+	"auth/internal/database"
+	"auth/internal/logger"
+	"auth/internal/machinery"
+	"auth/internal/redis"
 
 	"google.golang.org/grpc"
 )
@@ -14,12 +20,17 @@ type App struct {
 	Logger     *slog.Logger
 }
 
-func New(port string, logger *slog.Logger) *App {
+func New(config *cfg.Config) *App {
+	logger := logger.SetupLogger(config.Env)
+	database.Init(config.DSN)
+	redis.Init(config.Redis.Address, config.Redis.Password, config.Redis.DB)
+	machinery.Init(config.Mail.Email, config.Mail.Password, config.Machinery.Broker, config.Machinery.ResultBackend)
+
 	grpcServer := grpc.NewServer()
 
 	authgrpc.Register(grpcServer)
 
-	return &App{Port: port, GRPCServer: grpcServer, Logger: logger}
+	return &App{Port: config.Port, GRPCServer: grpcServer, Logger: logger}
 }
 
 func (a *App) Run() error {
