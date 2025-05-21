@@ -4,7 +4,7 @@
 // - protoc             v3.21.12
 // source: main.proto
 
-package auth
+package _go
 
 import (
 	context "context"

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "auth/auth";
+option go_package = "api/go";
 
 service Auth {
     rpc Register(RegisterRequest) returns (RegisterResponse);

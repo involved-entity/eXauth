@@ -1,4 +1,4 @@
-PROTO_DIR := protos
+PROTO_DIR := api
 PROTO_FILE := $(PROTO_DIR)/main.proto
 CONFIG_PATH := $(PWD)/config/local.test.yml
 export CONFIG_PATH

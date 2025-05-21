@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"auth/auth/auth"
+	auth "auth/api/go"
 	conf "auth/internal/config"
 	"auth/internal/database"
 	"auth/internal/redis"
