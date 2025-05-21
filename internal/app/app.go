@@ -9,7 +9,7 @@ import (
 	"auth/internal/logger"
 	"auth/internal/machinery"
 	"auth/internal/pkg/database"
-	"auth/internal/redis"
+	"auth/internal/pkg/redis"
 
 	"google.golang.org/grpc"
 )

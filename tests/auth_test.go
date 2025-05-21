@@ -4,7 +4,7 @@ import (
 	"auth/api/auth"
 	conf "auth/internal/pkg/config"
 	"auth/internal/pkg/database"
-	"auth/internal/redis"
+	"auth/internal/pkg/redis"
 	"context"
 	"log"
 	"os"
