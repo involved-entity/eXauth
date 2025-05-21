@@ -7,6 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v7 v7.2.1
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
+	github.com/redis/go-redis/v9 v9.8.0
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 )
@@ -14,7 +15,9 @@ require (
 require (
 	ariga.io/atlas-go-sdk v0.7.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/go-sql-driver/mysql v1.9.2 // indirect
 	github.com/golang-sql/civil v0.0.0-20220223132316-b832511892a9 // indirect
 	github.com/golang-sql/sqlexp v0.1.0 // indirect
