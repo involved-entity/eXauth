@@ -14,6 +14,7 @@ import (
 	"time"
 
 	machineryTasks "github.com/RichardKnop/machinery/v2/tasks"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -112,4 +113,12 @@ func CreateAndSendResetPasswordLink(id uint, email string) error {
 	machineryServer.SendTaskWithContext(context.Background(), signature)
 
 	return nil
+}
+
+func GenerateHashedPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", status.Error(codes.Internal, "failed to hash password")
+	}
+	return string(hashedPassword), nil
 }

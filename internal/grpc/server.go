@@ -51,6 +51,12 @@ type ResetPasswordDTO struct {
 	Username string `json:"username" validate:"required,min=5,max=16"`
 }
 
+type ResetPasswordConfirmDTO struct {
+	ID       int    `json:"id" validate:"required,gt=0"`
+	Token    string `json:"token" validate:"required"`
+	Password string `json:"password" validate:"required,min=8,max=64"`
+}
+
 type serverAPI struct {
 	auth.UnimplementedAuthServer
 }
@@ -84,9 +90,9 @@ func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.
 		return nil, err
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(r.Password), bcrypt.DefaultCost)
+	hashedPassword, err := GenerateHashedPassword(r.Password)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to hash password")
+		return nil, err
 	}
 
 	rep := Repository{db: database.GetDB()}
@@ -212,4 +218,27 @@ func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordReques
 	}
 
 	return &auth.ResetPasswordResponse{Msg: "success"}, nil
+}
+
+func (s *serverAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
+	dto := ResetPasswordConfirmDTO{}
+	if err := ValidateRequest(r, dto); err != nil {
+		return nil, err
+	}
+
+	config := conf.GetConfig()
+	if err := CheckRedisToken(dto.ID, dto.Token, config.ResetToken.RedisName); err != nil {
+		return nil, err
+	}
+
+	hashedPassword, err := GenerateHashedPassword(dto.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	rep := Repository{db: database.GetDB(), UserID: dto.ID}
+	if err := rep.ChangeUserPassword(hashedPassword); err != nil {
+		return nil, status.Error(codes.Internal, "failed to reset password")
+	}
+	return &auth.ResetPasswordConfirmResponse{Msg: "success"}, nil
 }

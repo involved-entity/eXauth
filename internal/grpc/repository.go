@@ -58,13 +58,13 @@ func (r Repository) VerificateUser() error {
 	return nil
 }
 
-// func (r Repository) ChangeUserPassword(hashedPassword string) error {
-// 	if err := r.db.Model(&database.User{}).Where("id = ?", r.UserID).Update("password", hashedPassword).Error; err != nil {
-// 		log.Println("Error when set new password for user", r.UserID, err)
-// 		return err
-// 	}
-// 	return nil
-// }
+func (r Repository) ChangeUserPassword(hashedPassword string) error {
+	if err := r.db.Model(&database.User{}).Where("id = ?", r.UserID).Update("password", hashedPassword).Error; err != nil {
+		log.Println("Error when set new password for user", r.UserID, err)
+		return err
+	}
+	return nil
+}
 
 // func (r Repository) UpdateAccount(email string) (database.User, error) {
 // 	var user database.User
