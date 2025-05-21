@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
-	_ "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -76,22 +75,17 @@ func TestRegister(t *testing.T) {
 		Password: userData.Password,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
+	require.NoError(t, err)
 	userData.ID = int(response.Id)
 }
 
 func TestRegenerateCode(t *testing.T) {
-	_, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
+	response, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
 		Id:    int64(userData.ID),
 		Email: userData.Email,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	AssertSuccess(t, err, response.GetMsg())
 }
 
 func TestActivateAccount(t *testing.T) {
@@ -100,17 +94,15 @@ func TestActivateAccount(t *testing.T) {
 	redisClient := redis.GetClient()
 
 	otp, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
+
+	require.NoError(t, err)
+
+	response, err := client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
 		Id:   int64(userData.ID),
 		Code: otp,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	AssertSuccess(t, err, response.GetMsg())
 }
 
 func TestLogin(t *testing.T) {
@@ -119,9 +111,8 @@ func TestLogin(t *testing.T) {
 		Password: userData.Password,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	require.NoError(t, err)
+	require.True(t, IsValidJWT(response.Token))
 
 	JWT = response.Token
 }
@@ -131,21 +122,16 @@ func TestIsAdmin(t *testing.T) {
 		Token: JWT,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	require.Equal(t, response.IsAdmin, false)
+	require.NoError(t, err)
+	require.False(t, response.IsAdmin)
 }
 
 func TestResetPassword(t *testing.T) {
-	_, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
+	response, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
 		Username: userData.Username,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	AssertSuccess(t, err, response.GetMsg())
 }
 
 func TestResetPasswordConfirm(t *testing.T) {
@@ -154,17 +140,14 @@ func TestResetPasswordConfirm(t *testing.T) {
 	redisClient := redis.GetClient()
 
 	token, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	_, err = client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
+	require.NoError(t, err)
+
+	response, err := client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
 		Id:       int64(userData.ID),
 		Token:    token,
 		Password: userData.Password,
 	})
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	AssertSuccess(t, err, response.GetMsg())
 }
