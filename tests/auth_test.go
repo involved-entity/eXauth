@@ -4,9 +4,11 @@ import (
 	"auth/auth/auth"
 	conf "auth/internal/config"
 	"auth/internal/database"
+	"auth/internal/redis"
 	"context"
 	"log"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -33,6 +35,7 @@ func InitTest() *grpc.ClientConn {
 	conf.MustLoad()
 	config := conf.GetConfig()
 	conn, err := grpc.NewClient("localhost:"+config.GRPC.Port, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	redis.Init(config.Redis.Address, config.Redis.Password, config.Redis.DB)
 	if err != nil {
 		log.Fatalf("Failed to connect to gRPC server: %v", err)
 	}
@@ -91,8 +94,27 @@ func TestRegenerateCode(t *testing.T) {
 	}
 }
 
+func TestActivateAccount(t *testing.T) {
+	config := conf.GetConfig()
+	name := config.OTP.RedisName
+	redisClient := redis.GetClient()
+
+	otp, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
+		Id:   int64(userData.ID),
+		Code: otp,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func TestLogin(t *testing.T) {
-	_, err := client.Login(context.Background(), &auth.LoginRequest{
+	response, err := client.Login(context.Background(), &auth.LoginRequest{
 		Username: userData.Username,
 		Password: userData.Password,
 	})
@@ -100,6 +122,8 @@ func TestLogin(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	JWT = response.Token
 }
 
 func TestIsAdmin(t *testing.T) {

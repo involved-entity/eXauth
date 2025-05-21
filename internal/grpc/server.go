@@ -85,7 +85,7 @@ func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.
 		Password: r.Password,
 	}
 
-	err := ValidateRequest(r, dto)
+	err := ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (s *serverAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginR
 		Password: r.Password,
 	}
 
-	err := ValidateRequest(r, dto)
+	err := ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +153,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 		Token: r.Token,
 	}
 
-	err := ValidateRequest(r, dto)
+	err := ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +174,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 
 func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
 	dto := RegenerateCodeDTO{ID: int(r.Id), Email: r.Email}
-	if err := ValidateRequest(r, dto); err != nil {
+	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 	if err := CreateAndSendToken(uint(dto.ID), dto.Email); err != nil {
@@ -184,8 +184,8 @@ func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequ
 }
 
 func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequest) (*auth.ActivateAccountResponse, error) {
-	dto := ActivateAccountDTO{}
-	if err := ValidateRequest(r, dto); err != nil {
+	dto := ActivateAccountDTO{ID: int(r.Id), Code: r.Code}
+	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
@@ -203,7 +203,7 @@ func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRe
 
 func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
 	dto := ResetPasswordDTO{}
-	if err := ValidateRequest(r, dto); err != nil {
+	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
@@ -222,7 +222,7 @@ func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordReques
 
 func (s *serverAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
 	dto := ResetPasswordConfirmDTO{}
-	if err := ValidateRequest(r, dto); err != nil {
+	if err := ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
