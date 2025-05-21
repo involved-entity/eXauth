@@ -44,19 +44,19 @@ func (r Repository) GetUser(userInfo UserInfo) (database.User, error) {
 	return user, nil
 }
 
-// func (r Repository) VerificateUser() error {
-// 	var user database.User
-// 	if err := r.db.Where("id = ?", r.UserID).First(&user).Error; err != nil {
-// 		log.Println("Error when get a user", r.UserID, err)
-// 		return err
-// 	}
-// 	user.IsVerified = true
-// 	if err := r.db.Save(&user).Error; err != nil {
-// 		log.Println("Error when save user verified status", err)
-// 		return err
-// 	}
-// 	return nil
-// }
+func (r Repository) VerificateUser() error {
+	var user database.User
+	if err := r.db.Where("id = ?", r.UserID).First(&user).Error; err != nil {
+		log.Println("Error when get a user", r.UserID, err)
+		return err
+	}
+	user.IsVerified = true
+	if err := r.db.Save(&user).Error; err != nil {
+		log.Println("Error when save user verified status", err)
+		return err
+	}
+	return nil
+}
 
 // func (r Repository) ChangeUserPassword(hashedPassword string) error {
 // 	if err := r.db.Model(&database.User{}).Where("id = ?", r.UserID).Update("password", hashedPassword).Error; err != nil {
