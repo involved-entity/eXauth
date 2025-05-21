@@ -151,12 +151,36 @@ func TestActivateAccount(t *testing.T) {
 
 	require.NoError(t, err)
 
-	response, err := client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
-		Id:   int64(userData.ID),
-		Code: otp,
-	})
+	tt := []map[string]any{
+		{
+			"id":      0,
+			"code":    "invalid",
+			"success": false,
+		},
+		{
+			"id":      userData.ID,
+			"code":    "invalid",
+			"success": false,
+		},
+		{
+			"id":      userData.ID,
+			"code":    otp,
+			"success": true,
+		},
+	}
 
-	AssertSuccess(t, err, response.GetMsg())
+	for _, tc := range tt {
+		response, err := client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
+			Id:   int64(tc["id"].(int)),
+			Code: tc["code"].(string),
+		})
+
+		if tc["success"].(bool) {
+			AssertSuccess(t, err, response.GetMsg())
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestLogin(t *testing.T) {
