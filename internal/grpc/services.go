@@ -9,6 +9,7 @@ import (
 	"errors"
 	"log"
 	"math/big"
+	"net/url"
 	"strconv"
 	"time"
 
@@ -70,5 +71,45 @@ func CheckRedisToken(id int, token string, name string) error {
 		return status.Error(codes.InvalidArgument, "invalid token")
 	}
 	redisClient.Del(context.Background(), name+":"+strconv.Itoa(id))
+	return nil
+}
+
+func CreateAndSendResetPasswordLink(id uint, email string) error {
+	token, err := generateSecureToken("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 64)
+	if err != nil {
+		return status.Error(codes.Internal, "failed to generate token")
+	}
+
+	redisClient := redis.GetClient()
+	config := conf.GetConfig()
+	redisClient.Set(
+		context.Background(),
+		config.ResetToken.RedisName+":"+strconv.Itoa(int(id)),
+		token,
+		time.Minute*time.Duration(config.ResetToken.RT_TTL),
+	)
+
+	baseURL, err := url.Parse(config.ResetToken.FrontendUrl)
+	if err != nil {
+		return status.Error(codes.Internal, "failed to parse frontend url")
+	}
+
+	query := url.Values{
+		"token": {token},
+		"id":    {strconv.Itoa(int(id))},
+	}
+
+	baseURL.RawQuery = query.Encode()
+
+	machineryServer := machinery.GetServer()
+	signature := &machineryTasks.Signature{
+		Name: "reset_password",
+		Args: []machineryTasks.Arg{
+			{Name: "email", Type: "string", Value: email},
+			{Name: "link", Type: "string", Value: baseURL.String()},
+		},
+	}
+	machineryServer.SendTaskWithContext(context.Background(), signature)
+
 	return nil
 }
