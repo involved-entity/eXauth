@@ -1,7 +1,7 @@
 package grpc
 
 import (
-	auth "auth/api/go"
+	"auth/api/auth"
 	"auth/internal/database"
 	"context"
 	"time"
