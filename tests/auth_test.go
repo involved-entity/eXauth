@@ -11,6 +11,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	_ "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -20,6 +21,7 @@ var JWT string
 var client auth.AuthClient
 
 type UserData struct {
+	ID       int
 	Username string
 	Password string
 }
@@ -64,7 +66,7 @@ func TestRegister(t *testing.T) {
 	userData.Username = gofakeit.Username()
 	userData.Password = gofakeit.Password(true, true, true, false, false, 8)
 
-	_, err := client.Register(context.Background(), &auth.RegisterRequest{
+	response, err := client.Register(context.Background(), &auth.RegisterRequest{
 		Email:    email,
 		Username: userData.Username,
 		Password: userData.Password,
@@ -74,11 +76,18 @@ func TestRegister(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	db := database.GetDB()
-	var user database.User
-	db.Where("username = ?", userData.Username).First(&user)
-	user.IsVerified = true
-	db.Save(&user)
+	userData.ID = int(response.Id)
+}
+
+func TestRegenerateCode(t *testing.T) {
+	_, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
+		Id:    int64(userData.ID),
+		Email: userData.Username,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func TestLogin(t *testing.T) {
@@ -90,4 +99,16 @@ func TestLogin(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func TestIsAdmin(t *testing.T) {
+	response, err := client.IsAdmin(context.Background(), &auth.IsAdminRequest{
+		Token: JWT,
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	require.Equal(t, response.IsAdmin, false)
 }
