@@ -24,6 +24,7 @@ type UserData struct {
 	ID       int
 	Username string
 	Password string
+	Email    string
 }
 
 var userData UserData
@@ -62,12 +63,12 @@ func TestRegister(t *testing.T) {
 		t.Fatal("gRPC client is not initialized")
 	}
 
-	email := gofakeit.Email()
+	userData.Email = gofakeit.Email()
 	userData.Username = gofakeit.Username()
 	userData.Password = gofakeit.Password(true, true, true, false, false, 8)
 
 	response, err := client.Register(context.Background(), &auth.RegisterRequest{
-		Email:    email,
+		Email:    userData.Email,
 		Username: userData.Username,
 		Password: userData.Password,
 	})
@@ -82,7 +83,7 @@ func TestRegister(t *testing.T) {
 func TestRegenerateCode(t *testing.T) {
 	_, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
 		Id:    int64(userData.ID),
-		Email: userData.Username,
+		Email: userData.Email,
 	})
 
 	if err != nil {
