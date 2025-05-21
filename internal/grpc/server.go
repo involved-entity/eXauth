@@ -2,7 +2,7 @@ package grpc
 
 import (
 	"auth/api/auth"
-	"auth/internal/database"
+	"auth/internal/pkg/database"
 	"context"
 	"time"
 

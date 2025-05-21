@@ -6,7 +6,7 @@ import (
 
 	"ariga.io/atlas-provider-gorm/gormschema"
 
-	"auth/internal/database"
+	"auth/internal/pkg/database"
 )
 
 func main() {
