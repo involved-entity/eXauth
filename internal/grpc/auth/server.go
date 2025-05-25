@@ -8,6 +8,8 @@ import (
 
 	conf "auth/internal/pkg/config"
 
+	utils "auth/internal/grpc"
+
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
@@ -85,7 +87,7 @@ func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.
 		Password: r.Password,
 	}
 
-	err := ValidateRequest(dto)
+	err := utils.ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +116,7 @@ func (s *serverAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginR
 		Password: r.Password,
 	}
 
-	err := ValidateRequest(dto)
+	err := utils.ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +155,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 		Token: r.Token,
 	}
 
-	err := ValidateRequest(dto)
+	err := utils.ValidateRequest(dto)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +176,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 
 func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
 	dto := RegenerateCodeDTO{ID: int(r.Id), Email: r.Email}
-	if err := ValidateRequest(dto); err != nil {
+	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 	if err := CreateAndSendToken(uint(dto.ID), dto.Email); err != nil {
@@ -185,7 +187,7 @@ func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequ
 
 func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequest) (*auth.ActivateAccountResponse, error) {
 	dto := ActivateAccountDTO{ID: int(r.Id), Code: r.Code}
-	if err := ValidateRequest(dto); err != nil {
+	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
@@ -203,7 +205,7 @@ func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRe
 
 func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
 	dto := ResetPasswordDTO{Username: r.Username}
-	if err := ValidateRequest(dto); err != nil {
+	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
@@ -222,7 +224,7 @@ func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordReques
 
 func (s *serverAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
 	dto := ResetPasswordConfirmDTO{ID: int(r.Id), Token: r.Token, Password: r.Password}
-	if err := ValidateRequest(dto); err != nil {
+	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
 	}
 
