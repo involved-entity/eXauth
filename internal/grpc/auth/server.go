@@ -67,19 +67,6 @@ func Register(gRPC *grpc.Server) {
 	auth.RegisterAuthServer(gRPC, &authAPI{})
 }
 
-func GetUserIDByJWT(JWT string) (int, error) {
-	config := conf.GetConfig()
-	parsedToken, err := jwt.Parse(JWT, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.JWT.SECRET), nil
-	})
-
-	if err != nil {
-		return 0, status.Error(codes.Unauthenticated, "invalid token")
-	}
-
-	return int(parsedToken.Claims.(jwt.MapClaims)["sub"].(map[string]interface{})["id"].(float64)), nil
-}
-
 func (s *authAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	dto := RegisterRequestDTO{
 		Email:    r.Email,
@@ -161,7 +148,7 @@ func (s *authAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAd
 	}
 
 	rep := Repository{db: database.GetDB()}
-	userID, err := GetUserIDByJWT(dto.Token)
+	userID, err := utils.GetUserIDByJWT(dto.Token)
 	if err != nil {
 		return nil, err
 	}
