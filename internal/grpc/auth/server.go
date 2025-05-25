@@ -59,8 +59,12 @@ type ResetPasswordConfirmDTO struct {
 	Password string `json:"password" validate:"required,min=8,max=64"`
 }
 
-type serverAPI struct {
+type authAPI struct {
 	auth.UnimplementedAuthServer
+}
+
+func Register(gRPC *grpc.Server) {
+	auth.RegisterAuthServer(gRPC, &authAPI{})
 }
 
 func GetUserIDByJWT(JWT string) (int, error) {
@@ -76,11 +80,7 @@ func GetUserIDByJWT(JWT string) (int, error) {
 	return int(parsedToken.Claims.(jwt.MapClaims)["sub"].(map[string]interface{})["id"].(float64)), nil
 }
 
-func Register(gRPC *grpc.Server) {
-	auth.RegisterAuthServer(gRPC, &serverAPI{})
-}
-
-func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.RegisterResponse, error) {
+func (s *authAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.RegisterResponse, error) {
 	dto := RegisterRequestDTO{
 		Email:    r.Email,
 		Username: r.Username,
@@ -110,7 +110,7 @@ func (s *serverAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.
 	return &auth.RegisterResponse{Id: int64(user.ID)}, nil
 }
 
-func (s *serverAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginResponse, error) {
+func (s *authAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginResponse, error) {
 	dto := LoginRequestDTO{
 		Username: r.Username,
 		Password: r.Password,
@@ -150,7 +150,7 @@ func (s *serverAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginR
 	return &auth.LoginResponse{Token: tokenString}, nil
 }
 
-func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAdminResponse, error) {
+func (s *authAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAdminResponse, error) {
 	dto := IsAdminRequestDTO{
 		Token: r.Token,
 	}
@@ -174,7 +174,7 @@ func (s *serverAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.Is
 	return &auth.IsAdminResponse{IsAdmin: user.IsAdmin}, nil
 }
 
-func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
+func (s *authAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequest) (*auth.RegenerateCodeResponse, error) {
 	dto := RegenerateCodeDTO{ID: int(r.Id), Email: r.Email}
 	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
@@ -185,7 +185,7 @@ func (s *serverAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeRequ
 	return &auth.RegenerateCodeResponse{Msg: "success"}, nil
 }
 
-func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequest) (*auth.ActivateAccountResponse, error) {
+func (s *authAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequest) (*auth.ActivateAccountResponse, error) {
 	dto := ActivateAccountDTO{ID: int(r.Id), Code: r.Code}
 	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func (s *serverAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRe
 	return &auth.ActivateAccountResponse{Msg: "success"}, nil
 }
 
-func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
+func (s *authAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest) (*auth.ResetPasswordResponse, error) {
 	dto := ResetPasswordDTO{Username: r.Username}
 	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
@@ -222,7 +222,7 @@ func (s *serverAPI) ResetPassword(c context.Context, r *auth.ResetPasswordReques
 	return &auth.ResetPasswordResponse{Msg: "success"}, nil
 }
 
-func (s *serverAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
+func (s *authAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordConfirmRequest) (*auth.ResetPasswordConfirmResponse, error) {
 	dto := ResetPasswordConfirmDTO{ID: int(r.Id), Token: r.Token, Password: r.Password}
 	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
