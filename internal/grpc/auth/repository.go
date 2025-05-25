@@ -47,18 +47,3 @@ func (r Repository) ChangeUserPassword(hashedPassword string) error {
 	}
 	return nil
 }
-
-// func (r Repository) UpdateAccount(email string) (database.User, error) {
-// 	var user database.User
-// 	err := r.db.Where("id = ?", r.UserID).First(&user).Error
-// 	if err != nil {
-// 		log.Println("Error when get user", r.UserID, err)
-// 		return database.User{}, err
-// 	}
-// 	user.Email = email
-// 	if err = r.db.Clauses(clause.Returning{}).Save(&user).Error; err != nil {
-// 		log.Println("Error when update user", r.UserID, err)
-// 		return database.User{}, err
-// 	}
-// 	return user, nil
-// }

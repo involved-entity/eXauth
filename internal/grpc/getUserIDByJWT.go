@@ -8,15 +8,32 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func GetUserIDByJWT(JWT string) (int, error) {
+func getJWTData(token string) (map[string]interface{}, error) {
 	config := conf.GetConfig()
-	parsedToken, err := jwt.Parse(JWT, func(token *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.JWT.SECRET), nil
 	})
 
 	if err != nil {
-		return 0, status.Error(codes.Unauthenticated, "invalid token")
+		var empty map[string]interface{}
+		return empty, status.Error(codes.Unauthenticated, "invalid token")
 	}
 
-	return int(parsedToken.Claims.(jwt.MapClaims)["sub"].(map[string]interface{})["id"].(float64)), nil
+	return parsedToken.Claims.(jwt.MapClaims)["sub"].(map[string]interface{}), nil
+}
+
+func GetUserIDByJWT(JWT string) (int, error) {
+	data, err := getJWTData(JWT)
+	if err != nil {
+		return 0, err
+	}
+	return int(data["id"].(float64)), nil
+}
+
+func GetUserEmailByJWT(JWT string) (string, error) {
+	data, err := getJWTData(JWT)
+	if err != nil {
+		return "", err
+	}
+	return data["email"].(string), nil
 }
