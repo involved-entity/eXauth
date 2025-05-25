@@ -109,7 +109,7 @@ func (s *authAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginRes
 	}
 
 	rep := Repository{db: database.GetDB()}
-	user, err := rep.GetUser(UserInfo{Username: dto.Username})
+	user, err := rep.GetUser(utils.UserInfo{Username: dto.Username})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
@@ -153,7 +153,7 @@ func (s *authAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAd
 		return nil, err
 	}
 
-	user, err := rep.GetUser(UserInfo{ID: userID})
+	user, err := rep.GetUser(utils.UserInfo{ID: userID})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
@@ -197,7 +197,7 @@ func (s *authAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest)
 	}
 
 	rep := Repository{db: database.GetDB()}
-	user, err := rep.GetUser(UserInfo{Username: dto.Username})
+	user, err := rep.GetUser(utils.UserInfo{Username: dto.Username})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
