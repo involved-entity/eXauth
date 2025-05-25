@@ -2,6 +2,7 @@ package app
 
 import (
 	authgrpc "auth/internal/grpc/auth"
+	usersgrpc "auth/internal/grpc/users"
 	cfg "auth/internal/pkg/config"
 	"log/slog"
 	"net"
@@ -29,6 +30,7 @@ func New(config *cfg.Config) *App {
 	grpcServer := grpc.NewServer()
 
 	authgrpc.Register(grpcServer)
+	usersgrpc.Register(grpcServer)
 
 	return &App{Port: config.Port, GRPCServer: grpcServer, Logger: logger}
 }
