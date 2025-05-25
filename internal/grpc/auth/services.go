@@ -1,4 +1,4 @@
-package grpc
+package auth
 
 import (
 	conf "auth/internal/pkg/config"
