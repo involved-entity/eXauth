@@ -4,6 +4,7 @@ import (
 	"auth/api/auth"
 	conf "auth/internal/pkg/config"
 	"auth/internal/pkg/redis"
+	utils "auth/tests"
 	"context"
 	"strconv"
 	"testing"
@@ -16,15 +17,15 @@ var authJWT string
 
 var authClient auth.AuthClient
 
-var authUserData UserData
+var authUserData utils.UserData
 
 func TestMain(m *testing.M) {
-	cl, conn := InitTest(auth.NewAuthClient)
+	cl, conn := utils.InitTest(auth.NewAuthClient)
 	authClient = cl
 
 	exitCode := m.Run()
 
-	ExitTest(conn, exitCode)
+	utils.ExitTest(conn, exitCode)
 }
 
 func TestRegister(t *testing.T) {
@@ -101,7 +102,7 @@ func TestRegenerateCode(t *testing.T) {
 		})
 
 		if tc["success"].(bool) {
-			AssertSuccess(t, err, response.GetMsg())
+			utils.AssertSuccess(t, err, response.GetMsg())
 		} else {
 			require.Error(t, err)
 		}
@@ -142,7 +143,7 @@ func TestActivateAccount(t *testing.T) {
 		})
 
 		if tc["success"].(bool) {
-			AssertSuccess(t, err, response.GetMsg())
+			utils.AssertSuccess(t, err, response.GetMsg())
 		} else {
 			require.Error(t, err)
 		}
@@ -176,7 +177,7 @@ func TestLogin(t *testing.T) {
 
 		if tc["success"].(bool) {
 			require.NoError(t, err)
-			require.True(t, IsValidJWT(response.Token))
+			require.True(t, utils.IsValidJWT(response.Token))
 
 			authJWT = response.Token
 		} else {
@@ -233,7 +234,7 @@ func TestResetPassword(t *testing.T) {
 		})
 
 		if tc["success"].(bool) {
-			AssertSuccess(t, err, response.GetMsg())
+			utils.AssertSuccess(t, err, response.GetMsg())
 		} else {
 			require.Error(t, err)
 		}
@@ -278,7 +279,7 @@ func TestResetPasswordConfirm(t *testing.T) {
 		})
 
 		if tc["success"].(bool) {
-			AssertSuccess(t, err, response.GetMsg())
+			utils.AssertSuccess(t, err, response.GetMsg())
 		} else {
 			require.Error(t, err)
 		}
