@@ -3,10 +3,8 @@ package tests
 import (
 	"auth/api/auth"
 	conf "auth/internal/pkg/config"
-	"auth/internal/pkg/database"
 	"auth/internal/pkg/redis"
 	"context"
-	"log"
 	"os"
 	"strconv"
 	"testing"
@@ -14,38 +12,13 @@ import (
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
-var JWT string
+var authJWT string
 
-var client auth.AuthClient
+var authClient auth.AuthClient
 
-type UserData struct {
-	ID       int
-	Username string
-	Password string
-	Email    string
-}
-
-var userData UserData
-
-func InitTest() *grpc.ClientConn {
-	conf.MustLoad()
-	config := conf.GetConfig()
-	conn, err := grpc.NewClient("localhost:"+config.GRPC.Port, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	redis.Init(config.Redis.Address, config.Redis.Password, config.Redis.DB)
-
-	if err != nil {
-		log.Fatalf("Failed to connect to gRPC server: %v", err)
-	}
-
-	database.Init(config.DSN)
-
-	client = auth.NewAuthClient(conn)
-
-	return conn
-}
+var authUserData UserData
 
 func ExitTest(con *grpc.ClientConn, exitCode int) {
 	con.Close()
@@ -54,7 +27,8 @@ func ExitTest(con *grpc.ClientConn, exitCode int) {
 }
 
 func TestMain(m *testing.M) {
-	conn := InitTest()
+	cl, conn := InitTest(auth.NewAuthClient)
+	authClient = cl
 
 	exitCode := m.Run()
 
@@ -62,39 +36,39 @@ func TestMain(m *testing.M) {
 }
 
 func TestRegister(t *testing.T) {
-	userData.Email = gofakeit.Email()
-	userData.Username = gofakeit.Username()
-	userData.Password = gofakeit.Password(true, true, true, false, false, 8)
+	authUserData.Email = gofakeit.Email()
+	authUserData.Username = gofakeit.Username()
+	authUserData.Password = gofakeit.Password(true, true, true, false, false, 8)
 
 	tt := []map[string]any{
 		{
 			"email":    "invalid.com",
-			"username": userData.Username,
-			"password": userData.Password,
+			"username": authUserData.Username,
+			"password": authUserData.Password,
 			"success":  false,
 		},
 		{
-			"email":    userData.Email,
+			"email":    authUserData.Email,
 			"username": "inv",
-			"password": userData.Password,
+			"password": authUserData.Password,
 			"success":  false,
 		},
 		{
-			"email":    userData.Email,
-			"username": userData.Username,
+			"email":    authUserData.Email,
+			"username": authUserData.Username,
 			"password": "inv",
 			"success":  false,
 		},
 		{
-			"email":    userData.Email,
-			"username": userData.Username,
-			"password": userData.Password,
+			"email":    authUserData.Email,
+			"username": authUserData.Username,
+			"password": authUserData.Password,
 			"success":  true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.Register(context.Background(), &auth.RegisterRequest{
+		response, err := authClient.Register(context.Background(), &auth.RegisterRequest{
 			Email:    tc["email"].(string),
 			Username: tc["username"].(string),
 			Password: tc["password"].(string),
@@ -102,7 +76,7 @@ func TestRegister(t *testing.T) {
 
 		if tc["success"].(bool) {
 			require.NoError(t, err)
-			userData.ID = int(response.Id)
+			authUserData.ID = int(response.Id)
 		} else {
 			require.Error(t, err)
 		}
@@ -113,23 +87,23 @@ func TestRegenerateCode(t *testing.T) {
 	tt := []map[string]any{
 		{
 			"id":      0,
-			"email":   userData.Email,
+			"email":   authUserData.Email,
 			"success": false,
 		},
 		{
-			"id":      userData.ID,
+			"id":      authUserData.ID,
 			"email":   "invalid.com",
 			"success": false,
 		},
 		{
-			"id":      userData.ID,
-			"email":   userData.Email,
+			"id":      authUserData.ID,
+			"email":   authUserData.Email,
 			"success": true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
+		response, err := authClient.RegenerateCode(context.Background(), &auth.RegenerateCodeRequest{
 			Id:    int64(tc["id"].(int)),
 			Email: tc["email"].(string),
 		})
@@ -147,7 +121,7 @@ func TestActivateAccount(t *testing.T) {
 	name := config.OTP.RedisName
 	redisClient := redis.GetClient()
 
-	otp, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
+	otp, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(authUserData.ID)).Result()
 
 	require.NoError(t, err)
 
@@ -158,19 +132,19 @@ func TestActivateAccount(t *testing.T) {
 			"success": false,
 		},
 		{
-			"id":      userData.ID,
+			"id":      authUserData.ID,
 			"code":    "invalid",
 			"success": false,
 		},
 		{
-			"id":      userData.ID,
+			"id":      authUserData.ID,
 			"code":    otp,
 			"success": true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
+		response, err := authClient.ActivateAccount(context.Background(), &auth.ActivateAccountRequest{
 			Id:   int64(tc["id"].(int)),
 			Code: tc["code"].(string),
 		})
@@ -187,23 +161,23 @@ func TestLogin(t *testing.T) {
 	tt := []map[string]any{
 		{
 			"username": "inv",
-			"password": userData.Password,
+			"password": authUserData.Password,
 			"success":  false,
 		},
 		{
-			"username": userData.Username,
+			"username": authUserData.Username,
 			"password": "invalid",
 			"success":  false,
 		},
 		{
-			"username": userData.Username,
-			"password": userData.Password,
+			"username": authUserData.Username,
+			"password": authUserData.Password,
 			"success":  true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.Login(context.Background(), &auth.LoginRequest{
+		response, err := authClient.Login(context.Background(), &auth.LoginRequest{
 			Username: tc["username"].(string),
 			Password: tc["password"].(string),
 		})
@@ -212,7 +186,7 @@ func TestLogin(t *testing.T) {
 			require.NoError(t, err)
 			require.True(t, IsValidJWT(response.Token))
 
-			JWT = response.Token
+			authJWT = response.Token
 		} else {
 			require.Error(t, err)
 		}
@@ -230,13 +204,13 @@ func TestIsAdmin(t *testing.T) {
 			"success": false,
 		},
 		{
-			"token":   JWT,
+			"token":   authJWT,
 			"success": true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.IsAdmin(context.Background(), &auth.IsAdminRequest{
+		response, err := authClient.IsAdmin(context.Background(), &auth.IsAdminRequest{
 			Token: tc["token"].(string),
 		})
 
@@ -256,13 +230,13 @@ func TestResetPassword(t *testing.T) {
 			"success":  false,
 		},
 		{
-			"username": userData.Username,
+			"username": authUserData.Username,
 			"success":  true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
+		response, err := authClient.ResetPassword(context.Background(), &auth.ResetPasswordRequest{
 			Username: tc["username"].(string),
 		})
 
@@ -279,7 +253,7 @@ func TestResetPasswordConfirm(t *testing.T) {
 	name := config.ResetToken.RedisName
 	redisClient := redis.GetClient()
 
-	token, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(userData.ID)).Result()
+	token, err := redisClient.Get(context.Background(), name+":"+strconv.Itoa(authUserData.ID)).Result()
 
 	require.NoError(t, err)
 
@@ -291,21 +265,21 @@ func TestResetPasswordConfirm(t *testing.T) {
 			"success":  false,
 		},
 		{
-			"id":       userData.ID,
+			"id":       authUserData.ID,
 			"token":    "invalid",
 			"password": "invalid",
 			"success":  false,
 		},
 		{
-			"id":       userData.ID,
+			"id":       authUserData.ID,
 			"token":    token,
-			"password": userData.Password,
+			"password": authUserData.Password,
 			"success":  true,
 		},
 	}
 
 	for _, tc := range tt {
-		response, err := client.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
+		response, err := authClient.ResetPasswordConfirm(context.Background(), &auth.ResetPasswordConfirmRequest{
 			Id:       int64(tc["id"].(int)),
 			Password: tc["password"].(string),
 			Token:    tc["token"].(string),
