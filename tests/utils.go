@@ -2,6 +2,7 @@ package tests
 
 import (
 	"log"
+	"os"
 	"testing"
 
 	conf "auth/internal/pkg/config"
@@ -41,6 +42,12 @@ func InitTest[T interface{}](clientConstructor func(grpc.ClientConnInterface) T)
 	client := clientConstructor(conn)
 
 	return client, conn
+}
+
+func ExitTest(con *grpc.ClientConn, exitCode int) {
+	con.Close()
+
+	os.Exit(exitCode)
 }
 
 func AssertSuccess(t *testing.T, err error, message string) {

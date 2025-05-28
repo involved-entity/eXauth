@@ -5,13 +5,11 @@ import (
 	conf "auth/internal/pkg/config"
 	"auth/internal/pkg/redis"
 	"context"
-	"os"
 	"strconv"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/grpc"
 )
 
 var authJWT string
@@ -19,12 +17,6 @@ var authJWT string
 var authClient auth.AuthClient
 
 var authUserData UserData
-
-func ExitTest(con *grpc.ClientConn, exitCode int) {
-	con.Close()
-
-	os.Exit(exitCode)
-}
 
 func TestMain(m *testing.M) {
 	cl, conn := InitTest(auth.NewAuthClient)
