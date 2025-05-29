@@ -4,7 +4,6 @@ import (
 	"auth/api/users"
 	"auth/tests/utils"
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -90,9 +89,6 @@ func TestUpdateMe(t *testing.T) {
 		})
 
 		if tc["success"].(bool) {
-			if err != nil {
-				fmt.Println(tc, err, response)
-			}
 			require.NoError(t, err)
 			usersUserData.Username = response.User.Username
 			usersUserData.Email = response.User.Email
