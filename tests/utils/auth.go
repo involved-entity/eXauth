@@ -15,7 +15,8 @@ func GetAuthorizedUser() (UserData, string) {
 	userData.Password = gofakeit.Password(true, true, true, false, false, 8)
 
 	r := auth.Repository{Db: database.GetDB()}
-	u, _ := r.SaveUser(userData.Username, userData.Email, userData.Password)
+	hashedPassword, _ := auth.GenerateHashedPassword(userData.Password)
+	u, _ := r.SaveUser(userData.Username, userData.Email, hashedPassword)
 	r.UserID = int(u.ID)
 	r.VerificateUser()
 
