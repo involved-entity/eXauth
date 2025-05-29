@@ -4,6 +4,7 @@ import (
 	"auth/api/users"
 	"auth/tests/utils"
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -25,25 +26,78 @@ func TestMain(m *testing.M) {
 func TestGetMe(t *testing.T) {
 	usersUserData, usersJWT = utils.GetAuthorizedUser()
 
-	response, err := usersClient.GetMe(context.Background(), &users.GetMeRequest{
-		Token: usersJWT,
-	})
+	tt := []map[string]any{
+		{
+			"token":   "invalid",
+			"success": false,
+		},
+		{
+			"token":   usersJWT,
+			"success": true,
+		},
+	}
 
-	require.NoError(t, err)
-	require.True(t, response.User.Email == usersUserData.Email)
-	require.True(t, response.User.Id == int64(usersUserData.ID))
-	require.True(t, response.User.Username == usersUserData.Username)
-	require.True(t, response.User.IsVerified)
+	for _, tc := range tt {
+		response, err := usersClient.GetMe(context.Background(), &users.GetMeRequest{
+			Token: tc["token"].(string),
+		})
+
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+			require.True(t, response.User.Email == usersUserData.Email)
+			require.True(t, response.User.Id == int64(usersUserData.ID))
+			require.True(t, response.User.Username == usersUserData.Username)
+			require.True(t, response.User.IsVerified)
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
 
 func TestUpdateMe(t *testing.T) {
-	_, err := usersClient.UpdateMe(context.Background(), &users.UpdateMeRequest{
-		Token:       usersJWT,
-		Username:    "newUsername",
-		Email:       "newEmail",
-		Password:    "newPassword",
-		NewPassword: "newPassword",
-	})
+	tt := []map[string]any{
+		{
+			"token":    "invalid",
+			"username": "inv",
+			"email":    "invalid.com",
+			"success":  false,
+		},
+		{
+			"token":    usersJWT,
+			"username": "inv",
+			"email":    "invalid.com",
+			"success":  false,
+		},
+		{
+			"token":    usersJWT,
+			"username": "inv",
+			"email":    "invalid.com",
+			"success":  false,
+		},
+		{
+			"token":    usersJWT,
+			"username": usersUserData.Username,
+			"email":    "example123@gmail.com",
+			"success":  true,
+		},
+	}
 
-	require.Error(t, err)
+	for _, tc := range tt {
+		response, err := usersClient.UpdateMe(context.Background(), &users.UpdateMeRequest{
+			Token:    tc["token"].(string),
+			Username: tc["username"].(string),
+			Email:    tc["email"].(string),
+		})
+
+		if tc["success"].(bool) {
+			if err != nil {
+				fmt.Println(tc, err, response)
+			}
+			require.NoError(t, err)
+			usersUserData.Username = response.User.Username
+			usersUserData.Email = response.User.Email
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
