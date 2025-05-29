@@ -35,3 +35,15 @@ func TestGetMe(t *testing.T) {
 	require.True(t, response.User.Username == usersUserData.Username)
 	require.True(t, response.User.IsVerified)
 }
+
+func TestUpdateMe(t *testing.T) {
+	_, err := usersClient.UpdateMe(context.Background(), &users.UpdateMeRequest{
+		Token:       usersJWT,
+		Username:    "newUsername",
+		Email:       "newEmail",
+		Password:    "newPassword",
+		NewPassword: "newPassword",
+	})
+
+	require.Error(t, err)
+}
