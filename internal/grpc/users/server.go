@@ -6,6 +6,7 @@ import (
 	"auth/internal/pkg/database"
 	"context"
 
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -84,7 +85,24 @@ func (s *usersAPI) UpdateMe(c context.Context, r *users.UpdateMeRequest) (*users
 	}
 
 	rep.UserID = id
-	user, err := rep.UpdateAccount(email)
+	var newPassword string
+
+	if dto.NewPassword != "" {
+		user, err := rep.GetUser(utils.UserInfo{ID: id})
+		if err != nil {
+			return nil, err
+		}
+
+		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(dto.Password)); err != nil {
+			return nil, status.Error(codes.InvalidArgument, "invalid password")
+		}
+
+		newPassword = dto.NewPassword
+	} else {
+		newPassword = ""
+	}
+
+	user, err := rep.UpdateAccount(email, newPassword)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
