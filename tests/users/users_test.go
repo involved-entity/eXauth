@@ -96,4 +96,45 @@ func TestUpdateMe(t *testing.T) {
 			require.Error(t, err)
 		}
 	}
+
+	tt = []map[string]any{
+		{
+			"token":        usersJWT,
+			"password":     "invalid",
+			"new_password": "invalid",
+			"success":      false,
+		},
+		{
+			"token":        usersJWT,
+			"password":     "invalid",
+			"new_password": usersUserData.Password,
+			"success":      false,
+		},
+		{
+			"token":        usersJWT,
+			"password":     usersUserData.Password,
+			"new_password": "inv",
+			"success":      false,
+		},
+		{
+			"token":        usersJWT,
+			"password":     usersUserData.Password,
+			"new_password": usersUserData.Password,
+			"success":      true,
+		},
+	}
+
+	for _, tc := range tt {
+		_, err := usersClient.UpdateMe(context.Background(), &users.UpdateMeRequest{
+			Token:       tc["token"].(string),
+			Password:    tc["password"].(string),
+			NewPassword: tc["new_password"].(string),
+		})
+
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+		} else {
+			require.Error(t, err)
+		}
+	}
 }
