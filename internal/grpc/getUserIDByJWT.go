@@ -30,10 +30,11 @@ func GetUserIDByJWT(JWT string) (int, error) {
 	return int(data["id"].(float64)), nil
 }
 
-func GetUserEmailByJWT(JWT string) (string, error) {
+func GetUserEmailAndIDByJWT(JWT string) (string, int, error) {
 	data, err := getJWTData(JWT)
 	if err != nil {
-		return "", err
+		return "", 0, err
 	}
-	return data["email"].(string), nil
+
+	return data["email"].(string), int(data["id"].(float64)), nil
 }

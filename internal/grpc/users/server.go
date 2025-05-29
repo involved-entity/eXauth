@@ -25,10 +25,10 @@ type GetMeDTO struct {
 
 type UpdateMeDTO struct {
 	Token       string `json:"token" validate:"required"`
-	Username    string `json:"username" validate:"min=5,max=16"`
-	Email       string `json:"email" validate:"email"`
-	Password    string `json:"password" validate:"min=8,max=64"`
-	NewPassword string `json:"new_password" validate:"min=8,max=64"`
+	Username    string `json:"username" validate:"omitempty,min=5,max=16"`
+	Email       string `json:"email" validate:"omitempty,email"`
+	Password    string `json:"password" validate:"omitempty,min=8,max=64"`
+	NewPassword string `json:"new_password" validate:"omitempty,min=8,max=64"`
 }
 
 func (s *usersAPI) GetMe(c context.Context, r *users.GetMeRequest) (*users.GetMeResponse, error) {
@@ -78,11 +78,12 @@ func (s *usersAPI) UpdateMe(c context.Context, r *users.UpdateMeRequest) (*users
 	}
 
 	rep := Repository{Db: database.GetDB()}
-	email, err := utils.GetUserEmailByJWT(dto.Token)
+	email, id, err := utils.GetUserEmailAndIDByJWT(dto.Token)
 	if err != nil {
 		return nil, err
 	}
 
+	rep.UserID = id
 	user, err := rep.UpdateAccount(email)
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
