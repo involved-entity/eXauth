@@ -2,6 +2,7 @@ package auth
 
 import (
 	conf "auth/internal/pkg/config"
+	"auth/internal/pkg/database"
 	"auth/internal/pkg/machinery"
 	"auth/internal/pkg/redis"
 	"context"
@@ -14,10 +15,30 @@ import (
 	"time"
 
 	machineryTasks "github.com/RichardKnop/machinery/v2/tasks"
+	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
+
+func CreateJWTToken(user database.User) (string, error) {
+	config := conf.GetConfig()
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": JWTData{
+			ID:       user.ID,
+			Username: user.Username,
+			Email:    user.Email,
+		},
+		"exp": time.Now().Add(time.Minute * time.Duration(config.JWT.JWT_TTL)).Unix(),
+	})
+
+	tokenString, err := token.SignedString([]byte(config.JWT.SECRET))
+	if err != nil {
+		return "", status.Error(codes.Internal, "failed to create token")
+	}
+	return tokenString, nil
+}
 
 func generateSecureToken(elements string, length int) (string, error) {
 	token := make([]byte, length)

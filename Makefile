@@ -22,6 +22,6 @@ run:
 
 test:
 	@echo "Using CONFIG_PATH=$(CONFIG_PATH)"
-	@go test -v ./tests/...
+	@go test -v -p 1 ./tests/auth/... ./tests/users/...
 
 .PHONY: generate, test

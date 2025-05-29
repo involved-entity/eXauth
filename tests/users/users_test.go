@@ -2,7 +2,7 @@ package usersTest
 
 import (
 	"auth/api/users"
-	utils "auth/tests"
+	"auth/tests/utils"
 	"context"
 	"testing"
 
@@ -10,6 +10,8 @@ import (
 )
 
 var usersClient users.UsersClient
+var usersJWT string
+var usersUserData utils.UserData
 
 func TestMain(m *testing.M) {
 	cl, conn := utils.InitTest(users.NewUsersClient)
@@ -21,11 +23,15 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetMe(t *testing.T) {
-	authJWT := utils.GetAuthJWT()
+	usersUserData, usersJWT = utils.GetAuthorizedUser()
 
-	_, err := usersClient.GetMe(context.Background(), &users.GetMeRequest{
-		Token: authJWT,
+	response, err := usersClient.GetMe(context.Background(), &users.GetMeRequest{
+		Token: usersJWT,
 	})
 
 	require.NoError(t, err)
+	require.True(t, response.User.Email == usersUserData.Email)
+	require.True(t, response.User.Id == int64(usersUserData.ID))
+	require.True(t, response.User.Username == usersUserData.Username)
+	require.True(t, response.User.IsVerified)
 }

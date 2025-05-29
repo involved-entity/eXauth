@@ -41,7 +41,7 @@ func (s *usersAPI) GetMe(c context.Context, r *users.GetMeRequest) (*users.GetMe
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	id, err := utils.GetUserIDByJWT(dto.Token)
 	if err != nil {
 		return nil, err
@@ -77,7 +77,7 @@ func (s *usersAPI) UpdateMe(c context.Context, r *users.UpdateMeRequest) (*users
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	email, err := utils.GetUserEmailByJWT(dto.Token)
 	if err != nil {
 		return nil, err

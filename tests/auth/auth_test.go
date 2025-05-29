@@ -1,10 +1,10 @@
-package tests
+package authTest
 
 import (
 	"auth/api/auth"
 	conf "auth/internal/pkg/config"
 	"auth/internal/pkg/redis"
-	utils "auth/tests"
+	"auth/tests/utils"
 	"context"
 	"strconv"
 	"testing"
@@ -13,10 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var authJWT string
-
 var authClient auth.AuthClient
-
+var authJWT string
 var authUserData utils.UserData
 
 func TestMain(m *testing.M) {

@@ -4,13 +4,11 @@ import (
 	"auth/api/auth"
 	"auth/internal/pkg/database"
 	"context"
-	"time"
 
 	conf "auth/internal/pkg/config"
 
 	utils "auth/internal/grpc"
 
-	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -84,7 +82,7 @@ func (s *authAPI) Register(c context.Context, r *auth.RegisterRequest) (*auth.Re
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	user, err := rep.SaveUser(r.Username, r.Email, string(hashedPassword))
 	if err != nil {
 		return nil, status.Error(codes.AlreadyExists, "this user already exists")
@@ -108,7 +106,7 @@ func (s *authAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginRes
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	user, err := rep.GetUser(utils.UserInfo{Username: dto.Username})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
@@ -118,20 +116,9 @@ func (s *authAPI) Login(c context.Context, r *auth.LoginRequest) (*auth.LoginRes
 		return nil, status.Error(codes.InvalidArgument, "invalid password")
 	}
 
-	config := conf.GetConfig()
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": JWTData{
-			ID:       user.ID,
-			Username: user.Username,
-			Email:    user.Email,
-		},
-		"exp": time.Now().Add(time.Minute * time.Duration(config.JWT.JWT_TTL)).Unix(),
-	})
-
-	tokenString, err := token.SignedString([]byte(config.JWT.SECRET))
+	tokenString, err := CreateJWTToken(user)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "failed to create token")
+		return nil, err
 	}
 
 	return &auth.LoginResponse{Token: tokenString}, nil
@@ -147,7 +134,7 @@ func (s *authAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAd
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	userID, err := utils.GetUserIDByJWT(dto.Token)
 	if err != nil {
 		return nil, err
@@ -183,7 +170,7 @@ func (s *authAPI) ActivateAccount(c context.Context, r *auth.ActivateAccountRequ
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB(), UserID: int(dto.ID)}
+	rep := Repository{Db: database.GetDB(), UserID: int(dto.ID)}
 	if err := rep.VerificateUser(); err != nil {
 		return nil, status.Error(codes.Internal, "failed to activate account")
 	}
@@ -196,7 +183,7 @@ func (s *authAPI) ResetPassword(c context.Context, r *auth.ResetPasswordRequest)
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB()}
+	rep := Repository{Db: database.GetDB()}
 	user, err := rep.GetUser(utils.UserInfo{Username: dto.Username})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
@@ -225,7 +212,7 @@ func (s *authAPI) ResetPasswordConfirm(c context.Context, r *auth.ResetPasswordC
 		return nil, err
 	}
 
-	rep := Repository{db: database.GetDB(), UserID: dto.ID}
+	rep := Repository{Db: database.GetDB(), UserID: dto.ID}
 	if err := rep.ChangeUserPassword(hashedPassword); err != nil {
 		return nil, status.Error(codes.Internal, "failed to reset password")
 	}
