@@ -48,7 +48,7 @@ func (s *usersAPI) GetMe(c context.Context, r *users.GetMeRequest) (*users.GetMe
 		return nil, err
 	}
 
-	user, err := rep.GetUser(utils.UserInfo{ID: id})
+	user, err := rep.GetUser(utils.UserInfo{ID: id, VerificateNotRequired: true})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}

@@ -140,7 +140,7 @@ func (s *authAPI) IsAdmin(c context.Context, r *auth.IsAdminRequest) (*auth.IsAd
 		return nil, err
 	}
 
-	user, err := rep.GetUser(utils.UserInfo{ID: userID})
+	user, err := rep.GetUser(utils.UserInfo{ID: userID, VerificateNotRequired: true})
 	if err != nil {
 		return nil, status.Error(codes.NotFound, "user not found")
 	}
