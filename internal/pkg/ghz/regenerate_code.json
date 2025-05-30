@@ -1,0 +1,4 @@
+{
+    "id": {{.RequestNumber}},
+    "email": "user-{{.RequestNumber}}@example.com"
+}
