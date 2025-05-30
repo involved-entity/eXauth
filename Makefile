@@ -26,7 +26,7 @@ test:
 	@echo "Using CONFIG_PATH=$(CONFIG_PATH)"
 	@go test -v -p 1 ./tests/auth/... ./tests/users/...
 
-ghz:
+load-test:
 	@export PATH=$PATH:$(go env GOPATH)/bin
 	@echo "Starting auth.Auth.Register DDOS..."
 	@ghz --insecure --proto ./$(PROTO_AUTH_FILE) --call auth.Auth.Register -n 1000 -c 5 --data-file ./$(GHZ_DATA_DIR)/register.json localhost:9090
