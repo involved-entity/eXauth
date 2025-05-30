@@ -9,7 +9,7 @@ GHZ_DATA_DIR := internal/pkg/ghz
 CONFIG_PATH := $(PWD)/config/local.test.yml
 export CONFIG_PATH
 
-generate:
+generate-proto:
 	protoc -I $(PROTO_AUTH_DIR) --go-grpc_out=. --go_out=. $(PROTO_AUTH_FILE)
 	protoc -I $(PROTO_USERS_DIR) --go-grpc_out=. --go_out=. $(PROTO_USERS_FILE)
 
