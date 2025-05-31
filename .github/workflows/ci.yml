@@ -31,4 +31,6 @@ jobs:
       - name: Run tests on remote server...
         run: |
           ssh -o StrictHostKeyChecking=no nofuture@${{ secrets.SSH_HOST }} \
-            "cd ~/project && make docker-test"
+            "cd ~/project && \
+            export PATH=\$PATH:/usr/local/go/bin && \
+            make docker-test"
