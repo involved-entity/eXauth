@@ -1,3 +1,5 @@
 config/local.yml
 config/local.test.yml
+config/local.docker.yml
 atlas.hcl
+atlas.docker.hcl
