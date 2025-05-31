@@ -24,8 +24,6 @@ jobs:
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude='.git/' \
-            --exclude='config/local*.yml' \
-            --exclude='atlas.hcl' \
             ./ nofuture@${{ secrets.SSH_HOST }}:~/project/
             
       - name: Run tests on remote server
@@ -33,6 +31,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no nofuture@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
+
+            mv config/local.docker.example.yml config/local.docker.yml
             
             docker-compose up -d
             
