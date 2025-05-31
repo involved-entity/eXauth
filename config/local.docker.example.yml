@@ -1,0 +1,25 @@
+env: "prod"
+dsn: "host=172.17.0.1 user=gorm password=gorm dbname=auth port=5432 sslmode=disable TimeZone=Europe/Moscow"
+grpc:
+  port: "50051"
+  timeout: 10s
+jwt:
+  ttl: 60
+  secret: "string"
+mail:
+  email: "string@gmail.com"
+  password: "string"
+otp:
+  redis_name: "otp"
+  ttl: 5
+reset_token:
+  redis_name: "rt"
+  ttl: 5
+  frontend_url: "http://localhost:3000/reset-password"
+machinery:
+  broker: "amqp://guest:guest@172.17.0.1:5672/"
+  result_backend: "amqp://guest:guest@172.17.0.1:5672/"
+redis:
+  address: "172.17.0.1:6379"
+  password: ""
+  db: 0

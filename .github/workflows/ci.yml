@@ -1,0 +1,34 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run tests on SSH server
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          
+      - name: Transfer files to remote server
+        run: |
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            --exclude='.git/' \
+            --exclude='config/local*.yml' \
+            --exclude='atlas.hcl' \
+            ./ nofuture@${{ secrets.SSH_HOST }}:~/project/
+            
+      - name: Run tests on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no nofuture@${{ secrets.SSH_HOST }} \
+            "cd ~/project && make docker-test"
