@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: gorm
       POSTGRES_PASSWORD: gorm
-      POSTGRES_DB: auth_test
+      POSTGRES_DB: auth
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -28,6 +28,16 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+
+  auth_service:
+    build: .
+    ports:
+      - "50051:50051"
+    environment:
+      CONFIG_PATH: /app/config/local.docker.yml
+    depends_on:
+      - postgres
+      - redis
 
 volumes:
   postgres_data:
