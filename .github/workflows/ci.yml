@@ -36,9 +36,11 @@ jobs:
             
             docker-compose up -d
             
-            while ! docker-compose exec -T postgres pg_isready -U gorm -d auth; do
-              sleep 1
-            done
+            # while ! docker-compose exec -T postgres pg_isready -U gorm -d auth; do
+              # sleep 1
+            # done
+
+            sleep 5
             
             make docker-test || true
             
