@@ -32,13 +32,13 @@ jobs:
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
 
-            mv config/local.docker.example.yml config/local.docker.yml
+            mv config/local.docker.template.yml config/local.docker.yml
             
-            docker-compose up -d
+            docker-compose -f docker-compose.prod.yml up -d
 
             sleep 5
             
             make docker-test || true
             
-            docker-compose down -v
+            docker-compose -f docker-compose.prod.yml down -v
           EOF
