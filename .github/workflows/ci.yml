@@ -35,10 +35,6 @@ jobs:
             mv config/local.docker.example.yml config/local.docker.yml
             
             docker-compose up -d
-            
-            # while ! docker-compose exec -T postgres pg_isready -U gorm -d auth; do
-              # sleep 1
-            # done
 
             sleep 5
             
