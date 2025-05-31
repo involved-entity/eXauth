@@ -14,13 +14,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - name: Install SSH key
+      - name: Install SSH key...
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
           
-      - name: Transfer files to remote server
+      - name: Transfer files to remote server...
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude='.git/' \
@@ -28,7 +28,7 @@ jobs:
             --exclude='atlas.hcl' \
             ./ nofuture@${{ secrets.SSH_HOST }}:~/project/
             
-      - name: Run tests on remote server
+      - name: Run tests on remote server...
         run: |
           ssh -o StrictHostKeyChecking=no nofuture@${{ secrets.SSH_HOST }} \
             "cd ~/project && make docker-test"
