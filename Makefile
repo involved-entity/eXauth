@@ -20,15 +20,15 @@ run:
 	go run cmd/auth/main.go
 
 run-test:
-	@echo "Using CONFIG_PATH=$(PWD)/config/local.test.yml"
+	@echo "Using CONFIG_PATH=/config/local.test.yml"
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go run cmd/auth/main.go
 
 test:
-	@echo "Using CONFIG_PATH=$(PWD)/config/local.test.yml"
+	@echo "Using CONFIG_PATH=/config/local.test.yml"
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go test -v -p 1 ./tests/auth/... ./tests/users/...
 
 docker-test:
-	@echo "Using CONFIG_PATH=$(PWD)/config/local.docker.yml"
+	@echo "Using CONFIG_PATH=/config/local.docker.yml"
 	@CONFIG_PATH=$(PWD)/config/local.docker.yml go test -v -p 1 ./tests/auth/... ./tests/users/...
 
 load-test:
