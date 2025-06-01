@@ -4,7 +4,7 @@ services:
     environment:
       POSTGRES_USER: gorm
       POSTGRES_PASSWORD: gorm
-      POSTGRES_DB: auth_test
+      POSTGRES_DB: auth
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
