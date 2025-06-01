@@ -38,7 +38,10 @@ jobs:
 
             sleep 10
             
-            make docker-test || true
+            make docker-test
+            TEST_EXIT_CODE=$?
             
             docker-compose -f docker-compose.prod.yml down -v
+
+            exit $TEST_EXIT_CODE
           EOF
