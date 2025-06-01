@@ -34,7 +34,7 @@ jobs:
 
             mv config/local.docker.template.yml config/local.docker.yml
             
-            docker-compose -f docker-compose.prod.yml up -d
+            docker-compose -f docker-compose.prod.yml up -d --build
 
             sleep 10
             
