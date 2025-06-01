@@ -19,6 +19,10 @@ migrate:
 run:
 	go run cmd/auth/main.go
 
+run-test:
+	@echo "Using CONFIG_PATH=$(PWD)/config/local.test.yml"
+	@CONFIG_PATH=$(PWD)/config/local.test.yml go run cmd/auth/main.go
+
 test:
 	@echo "Using CONFIG_PATH=$(PWD)/config/local.test.yml"
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go test -v -p 1 ./tests/auth/... ./tests/users/...
