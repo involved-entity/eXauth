@@ -14,7 +14,6 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /auth_service .
-COPY config/local.docker.yml ./config/
 
 EXPOSE 50051
 
