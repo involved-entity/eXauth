@@ -14,6 +14,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /auth_service .
+COPY config/prod.template.yml ./config/prod.yml
 
 EXPOSE 50051
 
