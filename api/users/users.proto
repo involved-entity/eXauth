@@ -7,6 +7,16 @@ option go_package = "api/users";
 service Users {
     rpc GetMe(GetMeRequest) returns (GetMeResponse);
     rpc UpdateMe(UpdateMeRequest) returns (UpdateMeResponse);
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+}
+
+message GetUserRequest {
+    string token = 1;
+    int64 id = 2;
+}
+
+message GetUserResponse {
+    User user = 1;
 }
 
 message GetMeRequest {
