@@ -153,9 +153,17 @@ func (s *authAPI) RegenerateCode(c context.Context, r *auth.RegenerateCodeReques
 	if err := utils.ValidateRequest(dto); err != nil {
 		return nil, err
 	}
+
+	rep := Repository{Db: database.GetDB(), UserID: dto.ID}
+	user, err := rep.GetUser(utils.UserInfo{ID: dto.ID, VerificateNotRequired: true})
+	if err != nil || user.IsVerified {
+		return &auth.RegenerateCodeResponse{Msg: "success"}, nil
+	}
+
 	if err := CreateAndSendToken(uint(dto.ID), dto.Email); err != nil {
 		return nil, err
 	}
+
 	return &auth.RegenerateCodeResponse{Msg: "success"}, nil
 }
 
