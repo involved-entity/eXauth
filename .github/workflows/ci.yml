@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   test:
@@ -13,26 +13,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
       - name: Install SSH key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-          
+
       - name: Transfer files to remote server
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude='.git/' \
             ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/project/
-            
+
       - name: Run tests on remote server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
 
-            mv config/prod.template.yml config/prod.yml
+            cp config/prod.template.yml config/prod.yml
             
             make run-prod
 
