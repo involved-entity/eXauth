@@ -32,6 +32,8 @@ jobs:
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
 
+            make generate-proto
+
             mv config/local.docker.template.yml config/local.docker.yml
             
             docker-compose -f docker-compose.prod.yml up -d
