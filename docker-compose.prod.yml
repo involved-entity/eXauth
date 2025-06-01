@@ -46,7 +46,7 @@ services:
     ports:
       - "50051:50051"
     environment:
-      CONFIG_PATH: /app/config/local.docker.yml
+      CONFIG_PATH: /app/config/prod.yml
     depends_on:
       postgres:
         condition: service_healthy

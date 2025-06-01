@@ -32,9 +32,9 @@ jobs:
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
 
-            mv config/local.docker.template.yml config/local.docker.yml
+            mv config/prod.template.yml config/prod.yml
             
-            docker-compose -f docker-compose.prod.yml up -d --build
+            make run-prod
 
             sleep 10
             
