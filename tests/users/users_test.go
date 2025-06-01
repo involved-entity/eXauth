@@ -138,3 +138,42 @@ func TestUpdateMe(t *testing.T) {
 		}
 	}
 }
+
+func TestGetUser(t *testing.T) {
+	_, jwt := utils.GetAuthorizedUser()
+
+	tt := []map[string]any{
+		{
+			"token":   "invalid",
+			"id":      int64(usersUserData.ID),
+			"success": false,
+		},
+		{
+			"token":   jwt,
+			"id":      int64(0),
+			"success": false,
+		},
+		{
+			"token":   jwt,
+			"id":      int64(usersUserData.ID),
+			"success": true,
+		},
+	}
+
+	for _, tc := range tt {
+		response, err := usersClient.GetUser(context.Background(), &users.GetUserRequest{
+			Token: tc["token"].(string),
+			Id:    tc["id"].(int64),
+		})
+
+		if tc["success"].(bool) {
+			require.NoError(t, err)
+			require.True(t, response.User.Email == usersUserData.Email)
+			require.True(t, response.User.Id == int64(usersUserData.ID))
+			require.True(t, response.User.Username == usersUserData.Username)
+			require.True(t, response.User.IsVerified)
+		} else {
+			require.Error(t, err)
+		}
+	}
+}

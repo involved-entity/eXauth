@@ -32,6 +32,11 @@ type UpdateMeDTO struct {
 	NewPassword string `json:"new_password" validate:"omitempty,min=8,max=64"`
 }
 
+type GetUserDTO struct {
+	Token string `json:"token" validate:"required"`
+	ID    int    `json:"id" validate:"required,gt=0"`
+}
+
 func (s *usersAPI) GetMe(c context.Context, r *users.GetMeRequest) (*users.GetMeResponse, error) {
 	dto := GetMeDTO{
 		Token: r.Token,
@@ -108,6 +113,39 @@ func (s *usersAPI) UpdateMe(c context.Context, r *users.UpdateMeRequest) (*users
 	}
 
 	return &users.UpdateMeResponse{
+		User: &users.User{
+			Id:         int64(user.ID),
+			Username:   user.Username,
+			Email:      user.Email,
+			IsVerified: user.IsVerified,
+			IsAdmin:    user.IsAdmin,
+		},
+	}, nil
+}
+
+func (s *usersAPI) GetUser(c context.Context, r *users.GetUserRequest) (*users.GetUserResponse, error) {
+	dto := GetUserDTO{
+		Token: r.Token,
+		ID:    int(r.Id),
+	}
+
+	err := utils.ValidateRequest(dto)
+	if err != nil {
+		return nil, err
+	}
+
+	rep := Repository{Db: database.GetDB()}
+	_, err = utils.GetUserIDByJWT(dto.Token)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := rep.GetUser(utils.UserInfo{ID: dto.ID})
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	return &users.GetUserResponse{
 		User: &users.User{
 			Id:         int64(user.ID),
 			Username:   user.Username,
