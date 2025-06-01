@@ -32,8 +32,8 @@ test:
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go test -v -count=1 -p 1 ./tests/auth/... ./tests/users/...
 
 docker-test:
-	@echo "Using CONFIG_PATH=/config/local.docker.yml"
-	@CONFIG_PATH=$(PWD)/config/local.docker.yml go test -v -count=1 -p 1 ./tests/auth/... ./tests/users/...
+	@echo "Using CONFIG_PATH=/config/prod.yml"
+	@CONFIG_PATH=$(PWD)/config/prod.yml go test -v -count=1 -p 1 ./tests/auth/... ./tests/users/...
 
 load-test:
 	@export PATH=$PATH:$(go env GOPATH)/bin
