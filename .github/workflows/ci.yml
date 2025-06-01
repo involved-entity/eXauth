@@ -24,11 +24,11 @@ jobs:
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
             --exclude='.git/' \
-            ./ nofuture@${{ secrets.SSH_HOST }}:~/project/
+            ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/project/
             
       - name: Run tests on remote server
         run: |
-          ssh -o StrictHostKeyChecking=no nofuture@${{ secrets.SSH_HOST }} << 'EOF'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ~/project
             export PATH=$PATH:/usr/local/go/bin
 
