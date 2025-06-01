@@ -23,6 +23,10 @@ run-test:
 	@echo "Using CONFIG_PATH=/config/local.test.yml"
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go run cmd/auth/main.go
 
+run-prod:
+	@echo "Using CONFIG_PATH=/config/prod.yml"
+	@docker-compose -f docker-compose.prod.yml up -d --build
+
 test:
 	@echo "Using CONFIG_PATH=/config/local.test.yml"
 	@CONFIG_PATH=$(PWD)/config/local.test.yml go test -v -count=1 -p 1 ./tests/auth/... ./tests/users/...
