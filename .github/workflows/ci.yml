@@ -45,5 +45,7 @@ jobs:
             
             docker-compose -f docker-compose.prod.yml down -v
 
+            rm -rf api
+
             exit $TEST_EXIT_CODE
           EOF
