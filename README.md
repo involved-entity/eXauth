@@ -3,7 +3,7 @@ __eXauth__ - gRPC сервис авторизации и аутентифика�
 
 ## Установка
 ```bash
-git clone https://github.com/involved-entity/eXauth
+git clone https://github.com/wellwe11well/eXauth
 cd eXauth
 ```
 
